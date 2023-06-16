@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String      @id @default(cuid())
+  email             String      @unique
+  displayName       String
+  username          String      @unique
+  password          String
+  posts             Post[]
+  ownedCommunities  Community[] @relation("OwnedBy")
+  memberCommunities Community[] @relation("Membership")
+}
+
+model Community {
+  id          String @id @default(cuid())
+  name        String @unique
+  displayName String
+  posts       Post[]
+  owner       User   @relation("OwnedBy", fields: [ownerId], references: [id])
+  ownerId     String
+  members     User[] @relation("Membership")
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  title       String
+  content     String
+  community   Community @relation(fields: [communityId], references: [id])
+  communityId String
+  author      User      @relation(fields: [authorId], references: [id])
+  authorId    String
+}
